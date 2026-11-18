@@ -634,19 +634,33 @@ de Python tampoco se incluyen en el repositorio.
 
 ## 15. Repositorios
 
-### GitHub
+### 15.1. GitHub
 
-Pendiente de publicación.
+Repositorio público que contiene el código fuente,
+los archivos de configuración, la documentación
+y las evidencias del proyecto.
 
-### Docker Hub
+https://github.com/milton97mejia-ux/ordenes-docker
 
-Imagen de Flask API:
+### 15.2. Docker Hub - Flask API
 
-Pendiente de publicación.
+Imagen de la API REST desarrollada con Flask.
 
-Imagen de Django Web:
+- Imagen: stratodelux72/ordenes-api:v1.0
+- Versión: v1.0
+- Visibilidad: Pública
 
-Pendiente de publicación.
+https://hub.docker.com/r/stratodelux72/ordenes-api
+
+### 15.3. Docker Hub - Django Web
+
+Imagen de la aplicación web desarrollada con Django.
+
+- Imagen: stratodelux72/ordenes-web:v1.0
+- Versión: v1.0
+- Visibilidad: Pública
+
+https://hub.docker.com/r/stratodelux72/ordenes-web
 
 ## 16. Integrante
 
