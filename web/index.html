@@ -1,0 +1,836 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Órdenes</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            color: #1e293b;
+            padding: 25px;
+        }
+
+        header {
+            background: #172554;
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            margin-bottom: 8px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .panel {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            box-shadow: 0 2px 8px #00000010;
+        }
+
+        h2 {
+            margin-bottom: 18px;
+            color: #172554;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            margin-bottom: 12px;
+        }
+
+        button {
+            padding: 11px 17px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 4px;
+        }
+
+        button:hover {
+            opacity: .85;
+        }
+
+        .primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .success {
+            background: #15803d;
+            color: white;
+        }
+
+        .danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .secondary {
+            background: #475569;
+            color: white;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 650px;
+        }
+
+        th, td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        th {
+            background: #eff6ff;
+            color: #1e3a8a;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .status {
+            padding: 5px 9px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .Pagada {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .Pendiente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .Anulada {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        #mensaje {
+            padding: 13px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            display: none;
+        }
+
+        #detalles {
+            margin-top: 15px;
+        }
+
+        .total {
+            text-align: right;
+            font-size: 21px;
+            font-weight: bold;
+            color: #172554;
+            margin-top: 18px;
+        }
+
+        .muted {
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+
+        @media(max-width: 600px) {
+            body {
+                padding: 12px;
+            }
+
+            .panel {
+                padding: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>Gestión de Órdenes</h1>
+        <p>Sistema de administración de órdenes y detalles</p>
+    </header>
+
+    <div id="mensaje"></div>
+
+    <!-- CREAR ORDEN -->
+    <section class="panel">
+        <h2>Registrar nueva orden</h2>
+
+        <form id="formOrden">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>Nombre del cliente</label>
+                    <input type="text" id="cliente"
+                           placeholder="Nombre del cliente"
+                           required>
+                </div>
+
+                <div>
+                    <label>Fecha</label>
+                    <input type="date" id="fecha" required>
+                </div>
+
+                <div>
+                    <label>Estado</label>
+                    <select id="estado">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Pagada">Pagada</option>
+                        <option value="Anulada">Anulada</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <button class="primary" type="submit">
+                Registrar orden
+            </button>
+
+        </form>
+    </section>
+
+    <!-- LISTADO DE ORDENES -->
+    <section class="panel">
+
+        <h2>Órdenes registradas</h2>
+
+        <p class="muted">
+            Consulta, actualiza o elimina las órdenes.
+        </p>
+
+        <button class="secondary" onclick="cargarOrdenes()">
+            Actualizar listado
+        </button>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody id="tablaOrdenes">
+                    <tr>
+                        <td colspan="6">Cargando órdenes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </section>
+
+    <!-- DETALLES DE ORDEN -->
+    <section class="panel" id="panelDetalles">
+
+        <h2>Detalles de la orden</h2>
+
+        <p id="ordenSeleccionada" class="muted">
+            Selecciona una orden para consultar sus productos.
+        </p>
+
+        <div id="formularioDetalle" style="display:none">
+
+            <form id="formDetalle">
+
+                <div class="form-grid">
+
+                    <div>
+                        <label>Producto</label>
+                        <input type="text" id="producto"
+                               placeholder="Nombre del producto"
+                               required>
+                    </div>
+
+                    <div>
+                        <label>Cantidad</label>
+                        <input type="number" id="cantidad"
+                               min="1" step="1" required>
+                    </div>
+
+                    <div>
+                        <label>Precio unitario</label>
+                        <input type="number" id="precio"
+                               min="0" step="0.01" required>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="success">
+                    Agregar producto
+                </button>
+
+            </form>
+
+        </div>
+
+        <div id="detalles"></div>
+
+        <div id="totalOrden" class="total"></div>
+
+    </section>
+
+</div>
+
+<script>
+
+const API = "";
+
+let ordenActual = null;
+let detallesActuales = [];
+
+// MOSTRAR MENSAJES
+
+function mostrarMensaje(texto, error = false) {
+
+    const elemento = document.getElementById("mensaje");
+
+    elemento.style.display = "block";
+    elemento.style.background = error ? "#fee2e2" : "#dcfce7";
+    elemento.style.color = error ? "#991b1b" : "#166534";
+    elemento.textContent = texto;
+
+    setTimeout(() => {
+        elemento.style.display = "none";
+    }, 5000);
+}
+
+// ESCAPAR TEXTO PARA MOSTRARLO EN HTML
+
+function escapar(texto) {
+    return String(texto ?? "").replace(/[&<>"']/g, caracter => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[caracter]);
+}
+
+// COMUNICACIÓN CON LA API
+
+async function peticion(url, opciones = {}) {
+
+    const respuesta = await fetch(API + url, {
+        ...opciones,
+        headers: {
+            ...(opciones.body ? {
+                "Content-Type": "application/json"
+            } : {}),
+            ...opciones.headers
+        }
+    });
+
+    const texto = await respuesta.text();
+
+    let datos;
+
+    try {
+        datos = texto ? JSON.parse(texto) : {};
+    } catch {
+        datos = texto;
+    }
+
+    if (!respuesta.ok) {
+        throw new Error(
+            datos.error || datos.message || "Error en la solicitud"
+        );
+    }
+
+    return datos;
+}
+
+// CARGAR ORDENES
+
+async function cargarOrdenes() {
+
+    const tabla = document.getElementById("tablaOrdenes");
+
+    try {
+
+        const datos = await peticion("/api/ordenes");
+
+        const ordenes = Array.isArray(datos)
+            ? datos
+            : datos.ordenes || [];
+
+        if (ordenes.length === 0) {
+            tabla.innerHTML =
+                '<tr><td colspan="6">No hay órdenes registradas.</td></tr>';
+            return;
+        }
+
+        tabla.innerHTML = ordenes.map(orden => `
+
+            <tr>
+
+                <td>${escapar(orden.id)}</td>
+
+                <td>${escapar(orden.cliente)}</td>
+
+                <td>${escapar(orden.fecha)}</td>
+
+                <td>
+                    <span class="status ${escapar(orden.estado)}">
+                        ${escapar(orden.estado)}
+                    </span>
+                </td>
+
+                <td>
+                    L ${Number(orden.total || 0).toFixed(2)}
+                </td>
+
+                <td>
+                    <button class="primary"
+                        onclick="verDetalles(${Number(orden.id)})">
+                        Ver
+                    </button>
+
+                    <button class="success"
+                        onclick="editarOrden(${Number(orden.id)})">
+                        Editar
+                    </button>
+
+                    <button class="danger"
+                        onclick="eliminarOrden(${Number(orden.id)})">
+                        Eliminar
+                    </button>
+                </td>
+
+            </tr>
+
+        `).join("");
+
+    } catch (error) {
+
+        tabla.innerHTML =
+            '<tr><td colspan="6">No se pudieron cargar las órdenes.</td></tr>';
+
+        mostrarMensaje(error.message, true);
+    }
+}
+
+// CREAR ORDEN
+
+document.getElementById("formOrden")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    const datos = {
+        cliente: document.getElementById("cliente").value.trim(),
+        estado: document.getElementById("estado").value,
+        fecha: document.getElementById("fecha").value
+    };
+
+    try {
+
+        await peticion("/api/ordenes", {
+            method: "POST",
+            body: JSON.stringify(datos)
+        });
+
+        mostrarMensaje("Orden registrada correctamente.");
+
+        this.reset();
+        document.getElementById("fecha").value =
+            new Date().toISOString().slice(0, 10);
+
+        await cargarOrdenes();
+
+    } catch (error) {
+
+        mostrarMensaje(error.message, true);
+    }
+
+});
+
+// CONSULTAR DETALLES
+
+async function verDetalles(id) {
+
+    ordenActual = id;
+    detallesActuales = [];
+
+    document.getElementById("ordenSeleccionada").textContent =
+        "Orden seleccionada: #" + id;
+
+    document.getElementById("formularioDetalle").style.display = "block";
+
+    const contenedor = document.getElementById("detalles");
+
+    contenedor.innerHTML = "Cargando detalles...";
+
+    try {
+
+        const datos = await peticion(
+            `/api/ordenes/${id}/detalles`
+        );
+
+        const detalles = Array.isArray(datos)
+            ? datos
+            : datos.detalles || [];
+
+        detallesActuales = detalles;
+
+        if (detalles.length === 0) {
+
+            contenedor.innerHTML =
+                "<p>Esta orden no tiene productos registrados.</p>";
+
+        } else {
+
+            contenedor.innerHTML = `
+
+                <div class="table-container">
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        ${detalles.map(detalle => `
+
+                            <tr>
+                                <td>${escapar(detalle.id)}</td>
+                                <td>${escapar(detalle.producto)}</td>
+                                <td>${escapar(detalle.cantidad)}</td>
+                                <td>L ${Number(detalle.precio_unitario).toFixed(2)}</td>
+                                <td>L ${Number(detalle.subtotal).toFixed(2)}</td>
+
+                                <td>
+                                    <button class="primary"
+                                        onclick="editarDetalle(${Number(detalle.id)})">
+                                        Editar
+                                    </button>
+
+                                    <button class="danger"
+                                        onclick="eliminarDetalle(${Number(detalle.id)})">
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+
+                        `).join("")}
+
+                    </tbody>
+
+                </table>
+                </div>
+
+            `;
+        }
+
+        await actualizarTotal(id);
+
+    } catch (error) {
+
+        contenedor.innerHTML = "";
+        mostrarMensaje(error.message, true);
+    }
+}
+
+// ACTUALIZAR TOTAL
+
+async function actualizarTotal(id) {
+
+    try {
+
+        const orden = await peticion(`/api/ordenes/${id}`);
+
+        document.getElementById("totalOrden").textContent =
+            "Total de la orden: L " +
+            Number(orden.total || 0).toFixed(2);
+
+    } catch (error) {
+
+        document.getElementById("totalOrden").textContent = "";
+    }
+}
+
+// AGREGAR DETALLE
+
+document.getElementById("formDetalle")
+.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    if (ordenActual === null) return;
+
+    const datos = {
+        producto: document.getElementById("producto").value.trim(),
+        cantidad: Number(document.getElementById("cantidad").value),
+        precio_unitario: Number(document.getElementById("precio").value)
+    };
+
+    try {
+
+        await peticion(
+            `/api/ordenes/${ordenActual}/detalles`,
+            {
+                method: "POST",
+                body: JSON.stringify(datos)
+            }
+        );
+
+        mostrarMensaje("Producto agregado correctamente.");
+
+        this.reset();
+
+        await verDetalles(ordenActual);
+        await cargarOrdenes();
+
+    } catch (error) {
+
+        mostrarMensaje(error.message, true);
+    }
+
+});
+
+// EDITAR ORDEN
+
+async function editarOrden(id) {
+
+    try {
+
+        const orden = await peticion(`/api/ordenes/${id}`);
+
+        const cliente = prompt(
+            "Nombre del cliente:",
+            orden.cliente
+        );
+
+        if (cliente === null) return;
+
+        const fecha = prompt(
+            "Fecha (AAAA-MM-DD):",
+            String(orden.fecha).slice(0, 10)
+        );
+
+        if (fecha === null) return;
+
+        const estado = prompt(
+            "Estado: Pendiente, Pagada o Anulada",
+            orden.estado
+        );
+
+        if (estado === null) return;
+
+        if (!cliente.trim()) {
+            mostrarMensaje("El cliente es obligatorio.", true);
+            return;
+        }
+
+        const fechaValida = new Date(fecha + "T00:00:00Z");
+
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha) ||
+            Number.isNaN(fechaValida.getTime()) ||
+            fechaValida.toISOString().slice(0, 10) !== fecha) {
+            mostrarMensaje("Fecha no válida. Usa AAAA-MM-DD.", true);
+            return;
+        }
+
+        if (!["Pendiente", "Pagada", "Anulada"].includes(estado)) {
+            mostrarMensaje("Estado no válido.", true);
+            return;
+        }
+
+        await peticion(`/api/ordenes/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                cliente: cliente.trim(),
+                fecha: fecha,
+                estado: estado
+            })
+        });
+
+        mostrarMensaje("Orden actualizada correctamente.");
+
+        await cargarOrdenes();
+
+        if (ordenActual === id) {
+            await actualizarTotal(id);
+        }
+
+    } catch (error) {
+
+        mostrarMensaje(error.message, true);
+    }
+}
+
+// EDITAR DETALLE
+
+async function editarDetalle(id) {
+    const detalle = detallesActuales.find(item => Number(item.id) === id);
+    if (!detalle || ordenActual === null) return;
+    const ordenId = ordenActual;
+
+    const producto = prompt("Nombre del producto:", detalle.producto);
+    if (producto === null) return;
+    const cantidadTexto = prompt("Cantidad:", String(detalle.cantidad));
+    if (cantidadTexto === null) return;
+    const precioTexto = prompt("Precio unitario:", Number(detalle.precio_unitario).toFixed(2));
+    if (precioTexto === null) return;
+
+    const cantidad = Number(cantidadTexto);
+    const precio = Number(precioTexto);
+
+    if (!producto.trim() || !cantidadTexto.trim() ||
+        !Number.isSafeInteger(cantidad) || cantidad <= 0 ||
+        !precioTexto.trim() || !Number.isFinite(precio) || precio < 0 ||
+        !/^\d+(\.\d{1,2})?$/.test(precioTexto.trim())) {
+        mostrarMensaje("Datos no válidos. Usa una cantidad entera positiva y un precio con hasta dos decimales.", true);
+        return;
+    }
+
+    try {
+        await peticion(`/api/detalles/${id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                producto: producto.trim(),
+                cantidad: cantidad,
+                precio_unitario: precio
+            })
+        });
+
+        mostrarMensaje("Producto actualizado correctamente.");
+        if (ordenActual === ordenId) await verDetalles(ordenId);
+        await cargarOrdenes();
+    } catch (error) {
+        mostrarMensaje(error.message, true);
+    }
+}
+
+// ELIMINAR DETALLE
+
+async function eliminarDetalle(id) {
+
+    if (!confirm("¿Deseas eliminar este producto?")) return;
+
+    try {
+
+        await peticion(`/api/detalles/${id}`, {
+            method: "DELETE"
+        });
+
+        mostrarMensaje("Detalle eliminado correctamente.");
+
+        await verDetalles(ordenActual);
+        await cargarOrdenes();
+
+    } catch (error) {
+
+        mostrarMensaje(error.message, true);
+    }
+}
+
+// ELIMINAR ORDEN
+
+async function eliminarOrden(id) {
+
+    if (!confirm(
+        "¿Estás seguro de eliminar la orden #" + id + "?"
+    )) return;
+
+    try {
+
+        await peticion(`/api/ordenes/${id}`, {
+            method: "DELETE"
+        });
+
+        mostrarMensaje("Orden eliminada correctamente.");
+
+        if (ordenActual === id) {
+
+            ordenActual = null;
+            detallesActuales = [];
+
+            document.getElementById("ordenSeleccionada").textContent =
+                "Selecciona una orden para consultar sus productos.";
+
+            document.getElementById("formularioDetalle").style.display =
+                "none";
+
+            document.getElementById("detalles").innerHTML = "";
+            document.getElementById("totalOrden").textContent = "";
+        }
+
+        await cargarOrdenes();
+
+    } catch (error) {
+
+        mostrarMensaje(error.message, true);
+    }
+}
+
+// INICIAR SISTEMA
+
+document.getElementById("fecha").value =
+    new Date().toISOString().slice(0, 10);
+
+cargarOrdenes();
+
+</script>
+
+</body>
+</html>

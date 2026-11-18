@@ -1,0 +1,7 @@
+﻿CONTAINER ID   NAME          CPU %     MEM USAGE / LIMIT   MEM %     NET I/O          BLOCK I/O         PIDS
+8fd6ed35633b   ordenes_api   0.01%     22.18MiB / 256MiB   8.66%     956B / 126B      0B / 176kB        1
+8ecfb8274118   ordenes_web   0.33%     66.31MiB / 512MiB   12.95%    998B / 126B      2.28MB / 1.18MB   3
+a207ba845e85   ordenes_db    2.46%     885.5MiB / 3GiB     28.83%    1.61MB / 345kB   51.3MB / 30.6MB   209
+/ordenes_db | CPU: 2000000000 | RAM: 3221225472
+/ordenes_api | CPU: 500000000 | RAM: 268435456
+/ordenes_web | CPU: 500000000 | RAM: 536870912

@@ -1,0 +1,12 @@
+﻿/ordenes_db | Usuario: mssql
+/ordenes_api | Usuario: appuser
+/ordenes_web | Usuario: appuser
+NAME          IMAGE                                        COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+ordenes_api   ordenes-docker-api                           "python app.py"          api       3 minutes ago   Up 3 minutes (healthy)   0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+ordenes_db    mcr.microsoft.com/mssql/server:2022-latest   "/opt/mssql/bin/launÔÇª"   db        2 hours ago     Up 2 hours (healthy)     0.0.0.0:1433->1433/tcp, [::]:1433->1433/tcp
+ordenes_web   ordenes-docker-web                           "python manage.py ruÔÇª"   web       3 minutes ago   Up 3 minutes (healthy)   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp
+1 object imported automatically (use -v 2 for details).
+
+DEBUG: False
+ALLOWED_HOSTS: ['localhost', '127.0.0.1']
+SECRET_KEY configurada: True

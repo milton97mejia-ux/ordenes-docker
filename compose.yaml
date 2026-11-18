@@ -1,0 +1,117 @@
+﻿services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ordenes_db
+    restart: unless-stopped
+
+    mem_limit: 3g
+    cpus: 2.0
+
+    environment:
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      MSSQL_PID: ${MSSQL_PID}
+
+    ports:
+      - "1433:1433"
+
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+    networks:
+      - ordenes_red
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+
+    container_name: ordenes_api
+    restart: unless-stopped
+
+    mem_limit: 256m
+    cpus: 0.5
+
+    environment:
+      DB_HOST: db
+      DB_PORT: "1433"
+      DB_NAME: OrdenesDB
+      DB_USER: sa
+      DB_PASSWORD: ${MSSQL_SA_PASSWORD}
+
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    networks:
+      - ordenes_red
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=5)"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+
+    container_name: ordenes_web
+    restart: unless-stopped
+
+    mem_limit: 512m
+    cpus: 0.5
+
+    environment:
+      API_URL: http://api:5000
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Configura DJANGO_SECRET_KEY en .env}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      api:
+        condition: service_healthy
+
+    networks:
+      - ordenes_red
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=5)"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  sqlserver_data:
+    name: ordenes_sqlserver_data
+
+networks:
+  ordenes_red:
+    name: ordenes_red
+    driver: bridge

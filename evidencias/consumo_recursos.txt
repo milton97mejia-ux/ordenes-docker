@@ -1,0 +1,4 @@
+﻿CONTAINER ID   NAME          CPU %     MEM USAGE / LIMIT    MEM %     NET I/O           BLOCK I/O         PIDS
+787fa9807609   ordenes_web   0.87%     67.12MiB / 15.6GiB   0.42%     12.2kB / 80.1kB   10.6MB / 1.18MB   4
+2376610aca46   ordenes_api   0.01%     24.16MiB / 15.6GiB   0.15%     186kB / 183kB     3.89MB / 180kB    1
+b556493414b9   ordenes_db    2.50%     1.143GiB / 15.6GiB   7.33%     1.82MB / 504kB    1.82GB / 75.4MB   203
